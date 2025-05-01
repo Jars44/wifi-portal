@@ -17,6 +17,11 @@ int userCount = 0;
 unsigned long lastBlinkTime = 0;
 bool ledState = false;
 
+// Track last login time to manage user timeout
+unsigned long lastLoginTime = 0;
+// User timeout duration in milliseconds (e.g., 5 minutes)
+const unsigned long userTimeout = 5 * 60 * 1000;
+
 // HTML halaman login
 const char* loginPage = R"rawliteral(
 <!DOCTYPE html>
@@ -282,6 +287,7 @@ void setup() {
 
   server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request){
     userCount++;
+    lastLoginTime = millis(); // Update last login time on each login
     Serial.println("User login! Total: " + String(userCount));
     request->send(200, "text/plain", "Login berhasil");
   });
@@ -296,6 +302,15 @@ void setup() {
 void loop() {
   dnsServer.processNextRequest();
 
+  unsigned long currentMillis = millis();
+
+  // Check for user timeout and decrement userCount if needed
+  if (userCount > 0 && (currentMillis - lastLoginTime >= userTimeout)) {
+    userCount--;
+    Serial.println("User timeout. Decrementing userCount to: " + String(userCount));
+    lastLoginTime = currentMillis; // Reset lastLoginTime after decrement
+  }
+
   if (userCount == 0) {
     digitalWrite(ledPin, LOW);  // Mati kalau tidak ada user
   } else if (userCount == 1) {
@@ -303,7 +318,6 @@ void loop() {
   } else {
     // Banyak user -> kedip cepat
     unsigned long blinkInterval = 1000 / userCount; // Semakin banyak, semakin cepat
-    unsigned long currentMillis = millis();
     
     if (currentMillis - lastBlinkTime >= blinkInterval) {
       ledState = !ledState;
