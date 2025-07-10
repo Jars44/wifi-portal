@@ -1,7 +1,7 @@
 
 # WiFi Portal
 
-A WiFi portal for micro controller
+A WiFi portal for microcontroller especially esp8266
 ## Install
 
 Clone this project
