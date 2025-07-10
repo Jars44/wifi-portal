@@ -1,16 +1,7 @@
 #include <Arduino.h>
-
-#ifdef ESP32
-#include <WiFi.h>
-#include <AsyncTCP.h>
-#include <SPIFFS.h>
-#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
-#include <FS.h>
-// #include <SPIFFS.h>
-#endif
-
+#include <LittleFS.h>
 #include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 
@@ -273,6 +264,12 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW); // Mulai dengan lampu mati
 
+  if(!LittleFS.begin()){
+    Serial.println("An error has occurred while mounting LittleFS");
+  } else {
+    Serial.println("LittleFS mounted successfully");
+  }
+
   WiFi.softAP(ssid, password);
   delay(100);
   IPAddress myIP = WiFi.softAPIP();
@@ -281,24 +278,12 @@ void setup() {
 
   dnsServer.start(53, "*", myIP);
 
-#ifdef ESP32
-  if(!SPIFFS.begin(true)){
-    Serial.println("Gagal mount SPIFFS");
-    return;
-  }
-#elif defined(ESP8266)
-  if(!SPIFFS.begin()){
-    Serial.println("Gagal mount SPIFFS");
-    return;
-  }
-#endif
-
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", loginPage);
   });
 
   server.on("/sound", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/sound.mp3", "audio/mpeg");
+    request->send(LittleFS, "/sound.mp3", "audio/mpeg");
   });
 
   server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request){
