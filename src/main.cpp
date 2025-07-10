@@ -5,7 +5,7 @@
 #include <AsyncTCP.h>
 #include <SPIFFS.h>
 
-const char* ssid = "WiFi GRATIS!!";
+const char* ssid = "XI RPL 3";
 const char* password = "";
 
 DNSServer dnsServer;
