@@ -1,9 +1,18 @@
 #include <Arduino.h>
+
+#ifdef ESP32
 #include <WiFi.h>
-#include <DNSServer.h>
-#include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
 #include <SPIFFS.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <FS.h>
+// #include <SPIFFS.h>
+#endif
+
+#include <DNSServer.h>
+#include <ESPAsyncWebServer.h>
 
 const char* ssid = "XI RPL 3";
 const char* password = "";
@@ -272,10 +281,17 @@ void setup() {
 
   dnsServer.start(53, "*", myIP);
 
+#ifdef ESP32
   if(!SPIFFS.begin(true)){
     Serial.println("Gagal mount SPIFFS");
     return;
   }
+#elif defined(ESP8266)
+  if(!SPIFFS.begin()){
+    Serial.println("Gagal mount SPIFFS");
+    return;
+  }
+#endif
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", loginPage);
