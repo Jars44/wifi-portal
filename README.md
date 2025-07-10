@@ -1,12 +1,3 @@
-A WiFi portal for microcontroller especially esp8266
-## Install
-
-Clone this project
-
-```bash
-  git clone https://github.com/Jars44/wifi-portal.git
-```
-=======
 # WiFi Portal for ESP8266
 
 This project is a WiFi portal designed specifically for microcontrollers, especially the ESP8266 (NodeMCU v2 board). It creates a captive portal that allows users to connect to a WiFi access point and log in through a modern web interface.
