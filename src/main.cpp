@@ -5,7 +5,7 @@
 #include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 
-const char* ssid = "XI RPL 3";
+const char* ssid = "UNKNOWN";
 const char* password = "";
 
 DNSServer dnsServer;
