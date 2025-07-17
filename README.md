@@ -7,7 +7,7 @@ This project is a WiFi portal designed specifically for microcontrollers, especi
 
 ## Features
 
-- Sets up a WiFi Soft Access Point (SSID: "XI RPL 3") without a password by default.
+- Sets up a WiFi Soft Access Point (SSID: "UNKNOWN") without a password by default.
 - Runs a DNS server and asynchronous web server to serve the captive portal.
 - Provides a stylish login page with light/dark mode toggle.
 - Plays a sound upon successful login.
@@ -66,8 +66,8 @@ platformio device monitor
 You can customize the WiFi SSID and password by modifying the following lines in `src/main.cpp`:
 
 ```cpp
-const char* ssid = "XI RPL 3";      // Change this to your desired SSID
-const char* password = "";           // Set a password or leave empty for open network
+const char* ssid = "Your_SSID";      // Change this to your desired SSID
+const char* password = "Your_Password";           // Set a password or leave empty for open network
 ```
 
 After making changes, rebuild and upload the firmware to your ESP8266 board.
