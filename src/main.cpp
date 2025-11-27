@@ -11,18 +11,14 @@ const char* password = "";
 DNSServer dnsServer;
 AsyncWebServer server(80);
 
-const int ledPin = 2;  // D2 biasanya pin 2
+const int ledPin = 2;
 
 int userCount = 0;
 unsigned long lastBlinkTime = 0;
 bool ledState = false;
-
-// Track last login time to manage user timeout
 unsigned long lastLoginTime = 0;
-// User timeout duration in milliseconds (e.g., 5 minutes)
 const unsigned long userTimeout = 5 * 60 * 1000;
 
-// HTML halaman login
 const char* loginPage = R"rawliteral(
 <!DOCTYPE html>
 <html>
@@ -94,7 +90,6 @@ const char* loginPage = R"rawliteral(
         box-shadow: 0 8px 30px rgba(59, 79, 138, 0.8);
         color: var(--button-text-color);
       }
-      /* Dark mode variables */
       body.dark-mode {
         --bg-gradient-start: #121212;
         --bg-gradient-end: #1e1e1e;
@@ -129,7 +124,6 @@ const char* loginPage = R"rawliteral(
           transform: translateY(0);
         }
       }
-      /* Theme toggle button */
       .theme-toggle {
         position: absolute;
         top: 15px;
@@ -151,11 +145,9 @@ const char* loginPage = R"rawliteral(
         fill: var(--toggle-icon-color);
         transition: fill 0.5s ease;
       }
-      /* Hover effect only in light mode */
       body:not(.dark-mode) .theme-toggle:hover {
         filter: brightness(0.8);
       }
-      /* No hover effect in dark mode */
       body.dark-mode .theme-toggle:hover {
         filter: none;
       }
@@ -196,7 +188,6 @@ const char* loginPage = R"rawliteral(
         onclick="toggleTheme()"
       >
         <svg id="theme-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <!-- Sun icon by default -->
           <circle cx="12" cy="12" r="5" />
           <g stroke="currentColor" stroke-width="2">
             <line x1="12" y1="1" x2="12" y2="3" />
@@ -232,12 +223,10 @@ const char* loginPage = R"rawliteral(
         const icon = document.getElementById("theme-icon");
         body.classList.toggle("dark-mode");
         if (body.classList.contains("dark-mode")) {
-          // Moon icon
           icon.innerHTML = `
           <path fill="none" stroke="currentColor" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
         `;
         } else {
-          // Sun icon
           icon.innerHTML = `
           <circle cx="12" cy="12" r="5" />
           <g stroke="currentColor" stroke-width="2">
@@ -259,22 +248,15 @@ const char* loginPage = R"rawliteral(
 )rawliteral";
 
 void setup() {
-  Serial.begin(115200);
 
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW); // Mulai dengan lampu mati
+  digitalWrite(ledPin, LOW);
 
-  if(!LittleFS.begin()){
-    Serial.println("An error has occurred while mounting LittleFS");
-  } else {
-    Serial.println("LittleFS mounted successfully");
-  }
+  LittleFS.begin();
 
   WiFi.softAP(ssid, password);
   delay(100);
   IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
 
   dnsServer.start(53, "*", myIP);
 
@@ -288,8 +270,7 @@ void setup() {
 
   server.on("/login", HTTP_POST, [](AsyncWebServerRequest *request){
     userCount++;
-    lastLoginTime = millis(); // Update last login time on each login
-    Serial.println("User login! Total: " + String(userCount));
+    lastLoginTime = millis();
     request->send(200, "text/plain", "Login berhasil");
   });
 
@@ -305,20 +286,17 @@ void loop() {
 
   unsigned long currentMillis = millis();
 
-  // Check for user timeout and decrement userCount if needed
   if (userCount > 0 && (currentMillis - lastLoginTime >= userTimeout)) {
     userCount--;
-    Serial.println("User timeout. Decrementing userCount to: " + String(userCount));
-    lastLoginTime = currentMillis; // Reset lastLoginTime after decrement
+    lastLoginTime = currentMillis;
   }
 
   if (userCount == 0) {
-    digitalWrite(ledPin, LOW);  // Mati kalau tidak ada user
+    digitalWrite(ledPin, LOW);
   } else if (userCount == 1) {
-    digitalWrite(ledPin, HIGH); // Nyala stabil kalau 1 user
+    digitalWrite(ledPin, HIGH);
   } else {
-    // Banyak user -> kedip cepat
-    unsigned long blinkInterval = 1000 / userCount; // Semakin banyak, semakin cepat
+    unsigned long blinkInterval = 1000 / userCount;
     
     if (currentMillis - lastBlinkTime >= blinkInterval) {
       ledState = !ledState;
